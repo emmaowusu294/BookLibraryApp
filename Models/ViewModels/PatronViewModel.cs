@@ -24,5 +24,9 @@ namespace BookLibraryApp.Models.ViewModels
         [Display(Name = "Phone Number (Optional)")]
         [StringLength(20)]
         public string? PhoneNumber { get; set; }
+
+
+        [Display(Name = "Patron Name")]
+        public string FullName => $"{FirstName} {LastName}";
     }
 }

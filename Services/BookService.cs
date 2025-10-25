@@ -1,10 +1,12 @@
 ﻿using BookLibraryApp.Models.Entities;
 using BookLibraryApp.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace BookLibraryApp.Services
 {
-    public class BookService
+    // The class now implements the IBookService interface
+    public class BookService : IBookService
     {
         private readonly LibraryDbContext _context;
 
@@ -13,10 +15,10 @@ namespace BookLibraryApp.Services
             _context = context;
         }
 
-        // 🟢 Get all books with author names
-        public List<BookViewModel> GetAllBooks()
+        // 🟢 Get all books with author names (Now Async)
+        public async Task<IEnumerable<BookViewModel>> GetAllBooksAsync()
         {
-            return _context.Books
+            return await _context.Books
                 .Include(b => b.Author)
                 .Select(b => new BookViewModel
                 {
@@ -25,15 +27,15 @@ namespace BookLibraryApp.Services
                     AuthorId = b.AuthorId,
                     AuthorName = b.Author != null ? b.Author.Name : "Unknown"
                 })
-                .ToList();
+                .ToListAsync(); // Use ToListAsync()
         }
 
-        // 🔵 Get a single book by ID
-        public BookViewModel GetBookById(int id)
+        // 🔵 Get a single book by ID (Now Async)
+        public async Task<BookViewModel?> GetBookByIdAsync(int id)
         {
-            var book = _context.Books
+            var book = await _context.Books
                 .Include(b => b.Author)
-                .FirstOrDefault(b => b.BookId == id);
+                .FirstOrDefaultAsync(b => b.BookId == id); // Use FirstOrDefaultAsync()
 
             if (book == null) return null;
 
@@ -46,16 +48,16 @@ namespace BookLibraryApp.Services
             };
         }
 
-        // 🟡 Add a new book
-        public void AddBook(BookViewModel model)
+        // 🟡 Add a new book (Now Async)
+        public async Task AddBookAsync(BookViewModel model)
         {
-            // ✅ Find or create author
-            var author = _context.Authors.FirstOrDefault(a => a.Name == model.AuthorName);
+            // ✅ Find or create author (Now Async)
+            var author = await _context.Authors.FirstOrDefaultAsync(a => a.Name == model.AuthorName);
             if (author == null)
             {
                 author = new Author { Name = model.AuthorName };
                 _context.Authors.Add(author);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync(); // Save the new author first
             }
 
             var newBook = new Book
@@ -65,37 +67,48 @@ namespace BookLibraryApp.Services
             };
 
             _context.Books.Add(newBook);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync(); // Use SaveChangesAsync()
         }
 
-        // 🟠 Update existing book
-        public void UpdateBook(BookViewModel model)
+        // 🟠 Update existing book (Now Async)
+        public async Task<bool> UpdateBookAsync(BookViewModel model)
         {
-            var book = _context.Books.Include(b => b.Author).FirstOrDefault(b => b.BookId == model.BookId);
-            if (book == null) return;
+            var book = await _context.Books.Include(b => b.Author).FirstOrDefaultAsync(b => b.BookId == model.BookId);
+            if (book == null) return false;
 
-            var author = _context.Authors.FirstOrDefault(a => a.Name == model.AuthorName);
+            // Find or create author (Now Async)
+            var author = await _context.Authors.FirstOrDefaultAsync(a => a.Name == model.AuthorName);
             if (author == null)
             {
                 author = new Author { Name = model.AuthorName };
                 _context.Authors.Add(author);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync(); // Save the new author
             }
 
             book.Title = model.Title;
             book.AuthorId = author.AuthorId;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        // 🔴 Delete a book
-        public void DeleteBook(int id)
+        // 🔴 Delete a book (Now Async)
+        public async Task<bool> DeleteBookAsync(int id)
         {
-            var book = _context.Books.Find(id);
-            if (book == null) return;
+            var book = await _context.Books.FindAsync(id); // FindAsync() is implicitly async
+            if (book == null) return false;
 
             _context.Books.Remove(book);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return true;
         }
+
+        // Retaining the synchronous methods for compatibility, though you should
+        // use the async versions in the controller.
+        public List<BookViewModel> GetAllBooks() => throw new NotImplementedException("Use GetAllBooksAsync()");
+        public BookViewModel GetBookById(int id) => throw new NotImplementedException("Use GetBookByIdAsync()");
+        public void AddBook(BookViewModel model) => throw new NotImplementedException("Use AddBookAsync()");
+        public void UpdateBook(BookViewModel model) => throw new NotImplementedException("Use UpdateBookAsync()");
+        public void DeleteBook(int id) => throw new NotImplementedException("Use DeleteBookAsync()");
     }
 }

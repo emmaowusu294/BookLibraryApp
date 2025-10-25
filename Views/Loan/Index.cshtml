@@ -1,0 +1,62 @@
+﻿@model IEnumerable<BookLibraryApp.Models.ViewModels.LoanViewModel>
+
+@{
+    ViewData["Title"] = "Loan History";
+}
+
+<h1>Loan History</h1>
+
+<p>
+    <a asp-action="Checkout" class="btn btn-success">Checkout New Book</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.BookTitle)</th>
+            <th>@Html.DisplayNameFor(model => model.PatronFullName)</th>
+            <th>@Html.DisplayNameFor(model => model.CheckoutDate)</th>
+            <th>@Html.DisplayNameFor(model => model.DueDate)</th>
+            <th>@Html.DisplayNameFor(model => model.ReturnDate)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            // Highlight overdue loans
+            var rowClass = item.Status == "OVERDUE" ? "table-danger" : "";
+            <tr class="@rowClass">
+                <td>@Html.DisplayFor(modelItem => item.BookTitle)</td>
+                <td>@Html.DisplayFor(modelItem => item.PatronFullName)</td>
+                <td>@Html.DisplayFor(modelItem => item.CheckoutDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
+                <td>
+                    @if (item.ReturnDate.HasValue)
+                    {
+                        @Html.DisplayFor(modelItem => item.ReturnDate)
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @if (!item.ReturnDate.HasValue)
+                    {
+                        // Action to return the book
+                        <form asp-action="Return" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@item.LoanId" />
+                            <button type="submit" class="btn btn-sm btn-primary">Return</button>
+                        </form>
+                    }
+                    | <a asp-action="Details" asp-route-id="@item.LoanId">Details</a>
+                    | <a asp-action="Delete" asp-route-id="@item.LoanId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

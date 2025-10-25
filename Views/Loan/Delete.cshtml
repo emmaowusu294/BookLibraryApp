@@ -1,0 +1,31 @@
+﻿@model BookLibraryApp.Models.ViewModels.LoanViewModel
+
+@{
+    ViewData["Title"] = "Delete Loan";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to permanently delete this loan transaction?</h3>
+<h5 class="text-danger">This action cannot be undone.</h5>
+
+<div>
+    <h4>Loan Transaction #@Model.LoanId</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.BookTitle)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.BookTitle)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PatronFullName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.PatronFullName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CheckoutDate)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CheckoutDate)</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="LoanId" />
+        <input type="submit" value="Delete Permanently" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to Loan History</a>
+    </form>
+</div>

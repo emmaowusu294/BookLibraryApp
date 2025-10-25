@@ -12,7 +12,11 @@ builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryConnection")));
 
 //register book service 
-builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<IBookService, BookService>();
+
+// Register the Loan service
+builder.Services.AddScoped<ILoanService, LoanService>();
+
 
 // Register the Patron service: When IPatronService is requested, 
 // the container provides an instance of PatronService.
