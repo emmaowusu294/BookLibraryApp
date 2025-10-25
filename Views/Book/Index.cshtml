@@ -1,0 +1,45 @@
+﻿@model IEnumerable<BookLibraryApp.Models.ViewModels.BookViewModel>
+
+@{
+    ViewData["Title"] = "Book List";
+}
+
+<h1>Library Books</h1>
+
+<p>
+    @* {{-- Button to navigate to the Create view --}} *@
+    <a asp-action="Create" class="btn btn-primary">Add New Book</a>
+</p>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            @* {{-- Display column headers using the ViewModel metadata --}} *@
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AuthorName)
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* {{-- Loop through the list of books --}} *@
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AuthorName)
+                </td>
+                <td>
+                    @* {{-- Action links for the current book --}} *@
+                    <a asp-action="Edit" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.BookId" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
