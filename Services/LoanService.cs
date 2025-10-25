@@ -131,5 +131,20 @@ namespace BookLibraryApp.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+
+        // New method implementation for overdue report
+        public async Task<IEnumerable<LoanViewModel>> GetOverdueLoansAsync()
+        {
+            var overdueLoans = await _context.Loans
+                .Include(l => l.Book)
+                .Include(l => l.Patron)
+                // WHERE clause: ReturnDate is NULL AND DueDate is before today
+                .Where(l => l.ReturnDate == null && l.DueDate.Date < DateTime.Now.Date)
+                .ToListAsync();
+
+            // Map the filtered entities to ViewModels
+            return overdueLoans.Select(MapToViewModel).ToList();
+        }
     }
 }

@@ -4,7 +4,7 @@ namespace BookLibraryApp.Services
 {
     public interface IBookService
     {
-        Task<IEnumerable<BookViewModel>> GetAllBooksAsync(); // Async version
+        Task<IEnumerable<BookViewModel>> GetAllBooksAsync(string? searchString);// Async version
         Task<BookViewModel?> GetBookByIdAsync(int id);      // Async version
         Task AddBookAsync(BookViewModel model);             // Async version
         Task<bool> UpdateBookAsync(BookViewModel model);    // Async version

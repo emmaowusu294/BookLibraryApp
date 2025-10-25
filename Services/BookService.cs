@@ -14,7 +14,7 @@ namespace BookLibraryApp.Services
         {
             _context = context;
         }
-
+        /*
         // 🟢 Get all books with author names (Now Async)
         public async Task<IEnumerable<BookViewModel>> GetAllBooksAsync()
         {
@@ -28,6 +28,35 @@ namespace BookLibraryApp.Services
                     AuthorName = b.Author != null ? b.Author.Name : "Unknown"
                 })
                 .ToListAsync(); // Use ToListAsync()
+        }*/
+
+        // 🟢 Get all books with author names (Now with Search Filter)
+        public async Task<IEnumerable<BookViewModel>> GetAllBooksAsync(string? searchString)
+        {
+            // Start with the base query
+            var query = _context.Books.Include(b => b.Author).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                // Convert the search string to lower case once for efficiency
+                var lowerSearch = searchString.ToLower();
+
+                // Apply the filter: Search by Title OR Author Name
+                query = query.Where(b =>
+                    b.Title.ToLower().Contains(lowerSearch) ||
+                    (b.Author != null && b.Author.Name.ToLower().Contains(lowerSearch)));
+            }
+
+            // Project the filtered query results to the ViewModel and execute asynchronously
+            return await query
+                .Select(b => new BookViewModel
+                {
+                    BookId = b.BookId,
+                    Title = b.Title,
+                    AuthorId = b.AuthorId,
+                    AuthorName = b.Author != null ? b.Author.Name : "Unknown"
+                })
+                .ToListAsync();
         }
 
         // 🔵 Get a single book by ID (Now Async)

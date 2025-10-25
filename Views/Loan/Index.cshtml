@@ -6,9 +6,15 @@
 
 <h1>Loan History</h1>
 
-<p>
-    <a asp-action="Checkout" class="btn btn-success">Checkout New Book</a>
-</p>
+<div class="d-flex justify-content-between align-items-center">
+    <p>
+        <a asp-action="Checkout" class="btn btn-success">Checkout New Book</a>
+    </p>
+    <p>
+        <a asp-action="Overdue" class="btn btn-warning">Overdue Loans</a>
+    </p>
+</div>  
+
 <table class="table table-striped">
     <thead>
         <tr>

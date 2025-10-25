@@ -26,7 +26,7 @@ namespace BookLibraryApp.Controllers
         private async Task LoadDropdownsAsync()
         {
             // 1. Await the async service calls
-            var books = await _bookService.GetAllBooksAsync();
+            var books = await _bookService.GetAllBooksAsync(null!);
             var patrons = await _patronService.GetAllPatrons(); // <-- MUST use the async method
 
             // 2. Use 'FullName' for the Patron SelectList
@@ -141,6 +141,17 @@ namespace BookLibraryApp.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+
+        // ---------------------------------------------------------------------
+        // OVERDUE REPORT (GET: /Loan/Overdue)
+        // ---------------------------------------------------------------------
+        public async Task<IActionResult> Overdue()
+        {
+            var overdueLoans = await _loanService.GetOverdueLoansAsync();
+
+            return View(overdueLoans);
         }
     }
 }

@@ -19,10 +19,16 @@ namespace BookLibraryApp.Controllers
         // GET: Book (Index)
         // ---------------------------------------------------------------------
         // Now 'async' and returns 'Task<IActionResult>'
-        public async Task<IActionResult> Index()
+        // GET: Book (Index)
+        // Add the searchString parameter
+        public async Task<IActionResult> Index(string searchString)
         {
-            // Use 'await' with the asynchronous service method
-            var books = await _bookService.GetAllBooksAsync();
+            // Pass the search string to the service method
+            var books = await _bookService.GetAllBooksAsync(searchString);
+
+            // This keeps the search term in the search box after filtering
+            ViewData["CurrentFilter"] = searchString;
+
             return View(books);
         }
 

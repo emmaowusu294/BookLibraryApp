@@ -14,5 +14,8 @@ namespace BookLibraryApp.Services
         Task<bool> ReturnBookAsync(int id);
 
         Task<bool> DeleteLoanAsync(int id);
+
+        //  New method signature for overdue report
+        Task<IEnumerable<LoanViewModel>> GetOverdueLoansAsync();
     }
 }
