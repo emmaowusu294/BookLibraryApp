@@ -1,53 +1,65 @@
-﻿using BookLibraryApp.Models;
-using BookLibraryApp.Models.Entities;
-using BookLibraryApp.Models.ViewModels;
-using BookLibraryApp.Services;
+﻿using BookLibraryApp.Models.ViewModels;
+using BookLibraryApp.Services; // Contains the IBookService interface
 using Microsoft.AspNetCore.Mvc;
-
-
-
+using System.Threading.Tasks; // Required for async/await
 
 namespace BookLibraryApp.Controllers
 {
     public class BookController : Controller
     {
-        private readonly BookService _bookService;
+        // 1. Dependency Injection: Use the INTERFACE (IBookService)
+        private readonly IBookService _bookService;
 
-        public BookController(BookService bookService)
+        public BookController(IBookService bookService)
         {
             _bookService = bookService;
         }
 
-        // GET: Book
-        public IActionResult Index()
+        // ---------------------------------------------------------------------
+        // GET: Book (Index)
+        // ---------------------------------------------------------------------
+        // Now 'async' and returns 'Task<IActionResult>'
+        public async Task<IActionResult> Index()
         {
-            var books = _bookService.GetAllBooks();
+            // Use 'await' with the asynchronous service method
+            var books = await _bookService.GetAllBooksAsync();
             return View(books);
         }
 
+        // ---------------------------------------------------------------------
         // GET: Book/Create
+        // ---------------------------------------------------------------------
+        // No DB calls, so it can remain synchronous (returns 'IActionResult')
         public IActionResult Create()
         {
             return View();
         }
 
+        // ---------------------------------------------------------------------
         // POST: Book/Create
+        // ---------------------------------------------------------------------
+        // Now 'async' and returns 'Task<IActionResult>'
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(BookViewModel model)
+        public async Task<IActionResult> Create(BookViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _bookService.AddBook(model);
+                // Use 'await'
+                await _bookService.AddBookAsync(model);
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
         }
 
+        // ---------------------------------------------------------------------
         // GET: Book/Edit/5
-        public IActionResult Edit(int id)
+        // ---------------------------------------------------------------------
+        // Now 'async' and returns 'Task<IActionResult>'
+        public async Task<IActionResult> Edit(int id)
         {
-            var book = _bookService.GetBookById(id);
+            // Use 'await'
+            var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
             {
                 return NotFound();
@@ -55,23 +67,35 @@ namespace BookLibraryApp.Controllers
             return View(book);
         }
 
+        // ---------------------------------------------------------------------
         // POST: Book/Edit/5
+        // ---------------------------------------------------------------------
+        // Now 'async' and returns 'Task<IActionResult>'
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(BookViewModel model)
+        public async Task<IActionResult> Edit(BookViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _bookService.UpdateBook(model);
+                // Use 'await'
+                bool success = await _bookService.UpdateBookAsync(model);
+                if (!success) // Check if the update failed (e.g., book not found)
+                {
+                    return NotFound();
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
         }
 
+        // ---------------------------------------------------------------------
         // GET: Book/Delete/5
-        public IActionResult Delete(int id)
+        // ---------------------------------------------------------------------
+        // Now 'async' and returns 'Task<IActionResult>'
+        public async Task<IActionResult> Delete(int id)
         {
-            var book = _bookService.GetBookById(id);
+            // Use 'await'
+            var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
             {
                 return NotFound();
@@ -79,17 +103,24 @@ namespace BookLibraryApp.Controllers
             return View(book);
         }
 
+        // ---------------------------------------------------------------------
         // POST: Book/Delete/5
+        // ---------------------------------------------------------------------
+        // Now 'async' and returns 'Task<IActionResult>'
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            _bookService.DeleteBook(id);
+            // Use 'await'
+            bool success = await _bookService.DeleteBookAsync(id);
+
+            // It's good practice to check if the delete was successful
+            if (!success)
+            {
+                return NotFound();
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }
-
-
-
-
 }
