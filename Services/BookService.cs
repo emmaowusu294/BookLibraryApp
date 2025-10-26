@@ -132,6 +132,31 @@ namespace BookLibraryApp.Services
             return true;
         }
 
+        public async Task<IEnumerable<BookViewModel>> GetAvailableBooksAsync()
+        {
+            // 1. Get IDs of all books currently out on loan (ReturnDate is null)
+            var checkedOutBookIds = await _context.Loans
+                .Where(l => l.ReturnDate == null)
+                .Select(l => l.BookId)
+                .ToListAsync();
+
+            // 2. Query all books and exclude the ones that are checked out
+            var availableBooks = await _context.Books
+                .Include(b => b.Author)
+                .Where(b => !checkedOutBookIds.Contains(b.BookId)) // Filter out checked-out books
+                .Select(b => new BookViewModel
+                {
+                    BookId = b.BookId,
+                    Title = b.Title,
+                    AuthorId = b.AuthorId,
+                    AuthorName = b.Author != null ? b.Author.Name : "Unknown"
+                })
+                .ToListAsync();
+
+            return availableBooks;
+        }
+
+
         // Retaining the synchronous methods for compatibility, though you should
         // use the async versions in the controller.
         public List<BookViewModel> GetAllBooks() => throw new NotImplementedException("Use GetAllBooksAsync()");

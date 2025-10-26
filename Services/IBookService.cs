@@ -9,6 +9,7 @@ namespace BookLibraryApp.Services
         Task AddBookAsync(BookViewModel model);             // Async version
         Task<bool> UpdateBookAsync(BookViewModel model);    // Async version
         Task<bool> DeleteBookAsync(int id);                 // Async version
+        Task<IEnumerable<BookViewModel>> GetAvailableBooksAsync();
 
         // Also add a synchronous version for use in non-async contexts if needed,
         // but it's best to keep everything async when hitting the DB.

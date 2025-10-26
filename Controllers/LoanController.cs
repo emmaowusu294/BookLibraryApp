@@ -22,16 +22,17 @@ namespace BookLibraryApp.Controllers
             _patronService = patronService;
         }
 
-        // Helper method to load Books and Patrons into ViewBag for dropdowns
+        // Helper method to load Patrons and *Available* Books into ViewBag
         private async Task LoadDropdownsAsync()
         {
-            // 1. Await the async service calls
-            var books = await _bookService.GetAllBooksAsync(null!);
-            var patrons = await _patronService.GetAllPatrons(); // <-- MUST use the async method
+            //FIX REQUIRED HERE: Use the new method to get only available books
+            var books = await _bookService.GetAvailableBooksAsync();
 
-            // 2. Use 'FullName' for the Patron SelectList
+            var patrons = await _patronService.GetAllPatrons();
+
+            // Creating SelectList items for the View
             ViewBag.Books = new SelectList(books, "BookId", "Title");
-            ViewBag.Patrons = new SelectList(patrons, "PatronId", "FullName"); // <-- MUST use FullName
+            ViewBag.Patrons = new SelectList(patrons, "PatronId", "FullName");
         }
 
         // ---------------------------------------------------------------------
@@ -59,6 +60,7 @@ namespace BookLibraryApp.Controllers
         // ---------------------------------------------------------------------
         // CHECKOUT (GET: /Loan/Checkout) - Shows the form
         // ---------------------------------------------------------------------
+       
         public async Task<IActionResult> Checkout()
         {
             await LoadDropdownsAsync();
@@ -72,25 +74,44 @@ namespace BookLibraryApp.Controllers
             
             return View(model);
         }
+       
+
 
         // ---------------------------------------------------------------------
-        // CHECKOUT (POST: /Loan/Checkout) - Handles the form submission
-        // ---------------------------------------------------------------------
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Checkout([Bind("BookId,PatronId")] LoanViewModel model)
+// CHECKOUT (POST: /Loan/Checkout) - Handles the form submission
+// ---------------------------------------------------------------------
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Checkout([Bind("BookId,PatronId")] LoanViewModel model)
+{
+    // Reload dropdowns in case we need to return the view with errors
+    await LoadDropdownsAsync();
+
+    if (ModelState.IsValid)
+    {
+        // Await the service call, which now returns true/false
+        bool success = await _loanService.CheckoutBookAsync(model.BookId, model.PatronId);
+
+        if (success)
         {
-            // Only validate the required fields for checkout
-            if (ModelState.IsValid)
-            {
-                await _loanService.CheckoutBookAsync(model.BookId, model.PatronId);
-                return RedirectToAction(nameof(Index));
-            }
-
-            // If validation fails, reload dropdowns before returning the view
-            await LoadDropdownsAsync();
-            return View(model);
+            return RedirectToAction(nameof(Index));
         }
+        else
+        {
+            //  If success is false, add a model error
+            ModelState.AddModelError(string.Empty, "This book is currently checked out and unavailable for loan.");
+            
+            // Re-select the book/patron IDs to keep them visible in the form
+            model.BookId = model.BookId;
+            model.PatronId = model.PatronId;
+        }
+    }
+
+    // If validation fails OR checkout fails, return to the view with errors
+    return View(model);
+}
+      
+        
         
         // ---------------------------------------------------------------------
         // RETURN (POST: /Loan/Return/5) - Handles returning a book

@@ -1,8 +1,20 @@
 using BookLibraryApp.Models.Entities;
 using BookLibraryApp.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using BookLibraryApp;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ---------------------------------------------------------------------
+// Identity Configuration
+// ---------------------------------------------------------------------
+// 1. Add Identity services (Must be before builder.Services.AddControllersWithViews())
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<LibraryDbContext>();
+
+// 2. Add Razor Pages support for Identity UI views
+builder.Services.AddRazorPages();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -36,14 +48,22 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+
+/// Must come AFTER UseRouting() and BEFORE UseEndpoints()
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
 
+
+// For standard MVC controllers
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+// For Identity Razor Pages (e.g., /Identity/Account/Login)
+app.MapRazorPages(); // <-- Required for Identity UI
 
 
 app.Run();

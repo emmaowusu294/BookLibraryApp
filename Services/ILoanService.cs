@@ -8,7 +8,7 @@ namespace BookLibraryApp.Services
         Task<LoanViewModel?> GetLoanByIdAsync(int id);
 
         // This method needs to pull the DueDate from the service logic
-        Task CheckoutBookAsync(int bookId, int patronId);
+        Task<bool> CheckoutBookAsync(int bookId, int patronId);
 
         // This method updates the ReturnDate
         Task<bool> ReturnBookAsync(int id);

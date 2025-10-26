@@ -72,11 +72,42 @@ namespace BookLibraryApp.Services
         // ---------------------------------------------------------------------
         // 3. Checkout Book (Create new Loan record)
         // ---------------------------------------------------------------------
-        public async Task CheckoutBookAsync(int bookId, int patronId)
-        {
-            // Optional: Add logic here to check if the book is already checked out!
-            // E.g.: var existingLoan = await _context.Loans.AnyAsync(l => l.BookId == bookId && l.ReturnDate == null);
+        /* public async Task CheckoutBookAsync(int bookId, int patronId)
+         {
+             // Optional: Add logic here to check if the book is already checked out!
+             // E.g.: var existingLoan = await _context.Loans.AnyAsync(l => l.BookId == bookId && l.ReturnDate == null);
 
+             var now = DateTime.Now;
+
+             var newLoan = new Loan
+             {
+                 BookId = bookId,
+                 PatronId = patronId,
+                 CheckoutDate = now,
+                 // Business Rule: DueDate is 14 days from checkout
+                 DueDate = now.AddDays(LoanPeriodDays),
+                 ReturnDate = null // Initially null
+             };
+
+             _context.Loans.Add(newLoan);
+             await _context.SaveChangesAsync();
+         }*/
+
+        // 3. Checkout Book (Create new Loan record)
+        public async Task<bool> CheckoutBookAsync(int bookId, int patronId)
+        {
+            // CRITICAL BUSINESS RULE: Prevent Duplicate Checkouts
+            // Check if there is ANY existing loan for this book where ReturnDate is NULL.
+            var isActiveLoan = await _context.Loans
+                .AnyAsync(l => l.BookId == bookId && l.ReturnDate == null);
+
+            if (isActiveLoan)
+            {
+                // Return false if the book is already checked out
+                return false;
+            }
+
+            // If the book is available, proceed with checkout
             var now = DateTime.Now;
 
             var newLoan = new Loan
@@ -84,13 +115,15 @@ namespace BookLibraryApp.Services
                 BookId = bookId,
                 PatronId = patronId,
                 CheckoutDate = now,
-                // Business Rule: DueDate is 14 days from checkout
                 DueDate = now.AddDays(LoanPeriodDays),
-                ReturnDate = null // Initially null
+                ReturnDate = null
             };
 
             _context.Loans.Add(newLoan);
             await _context.SaveChangesAsync();
+
+            // Return true for successful checkout
+            return true;
         }
 
         // ---------------------------------------------------------------------

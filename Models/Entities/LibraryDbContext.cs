@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using BookLibraryApp.Models.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace BookLibraryApp.Models.Entities;
 
-public partial class LibraryDbContext : DbContext
+public partial class LibraryDbContext : IdentityDbContext
 {
     public LibraryDbContext()
     {
     }
 
-    public LibraryDbContext(DbContextOptions<LibraryDbContext> options)
-        : base(options)
+    public LibraryDbContext(DbContextOptions<LibraryDbContext> options) : base(options)
     {
     }
 
@@ -29,6 +30,8 @@ public partial class LibraryDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Author>(entity =>
         {
             entity.HasKey(e => e.AuthorId).HasName("PK__Authors__70DAFC34D5B4C3F5");
