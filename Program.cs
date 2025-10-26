@@ -31,10 +31,6 @@ builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 
 
-// Register the Patron service: When IPatronService is requested, 
-// the container provides an instance of PatronService.
-builder.Services.AddScoped<IPatronService, PatronService>();
-
 
 var app = builder.Build();
 

@@ -1,183 +1,102 @@
-﻿using BookLibraryApp.Models.Entities;
-using BookLibraryApp.Models.ViewModels;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+//using BookLibraryApp.Data; // Your DbContext namespace
+using BookLibraryApp.Models.Entities; // Your Models namespace
 
 namespace BookLibraryApp.Services
 {
-    // this class implements the ILoanService interface
     public class LoanService : ILoanService
     {
         private readonly LibraryDbContext _context;
-
-        // Standard loan period in days (e.g., 14 days)
-        private const int LoanPeriodDays = 14;
 
         public LoanService(LibraryDbContext context)
         {
             _context = context;
         }
 
-        // Helper method to map Loan Entity to Loan ViewModel
-        private LoanViewModel MapToViewModel(Loan loan)
+        public async Task<IEnumerable<Loan>> GetAllLoansAsync()
         {
-            return new LoanViewModel
-            {
-                LoanId = loan.LoanId,
-                BookId = loan.BookId,
-                PatronId = loan.PatronId,
-                CheckoutDate = loan.CheckoutDate,
-                DueDate = loan.DueDate,
-                ReturnDate = loan.ReturnDate,
-
-                // Navigation data for display: Must be included via .Include()
-                BookTitle = loan.Book.Title,
-                PatronFullName = $"{loan.Patron.FirstName} {loan.Patron.LastName}"
-            };
-        }
-
-        // ---------------------------------------------------------------------
-        // 1. Get All Loans
-        // ---------------------------------------------------------------------
-        public async Task<IEnumerable<LoanViewModel>> GetAllLoansAsync()
-        {
-            // Eagerly load the related Book and Patron data using .Include()
-            var loans = await _context.Loans
+            // Includes the Book and User (Patron) details for display in the Admin view.
+            return await _context.Loans
                 .Include(l => l.Book)
-                .Include(l => l.Patron)
+                .Include(l => l.User) // Link to IdentityUser
                 .ToListAsync();
-
-            // Map the entities to ViewModels
-            return loans.Select(MapToViewModel).ToList();
         }
 
-        // ---------------------------------------------------------------------
-        // 2. Get Loan by ID
-        // ---------------------------------------------------------------------
-        public async Task<LoanViewModel?> GetLoanByIdAsync(int id)
+        // Admin Functionality
+        public async Task<IEnumerable<Loan>> GetOverdueLoansAsync()
         {
-            // Find the loan and eagerly load related data
-            var loan = await _context.Loans
+            // For digital access, "Overdue" means IsActive is true BUT DueDate is in the past.
+            return await _context.Loans
                 .Include(l => l.Book)
-                .Include(l => l.Patron)
-                .FirstOrDefaultAsync(l => l.LoanId == id);
-
-            if (loan == null)
-            {
-                return null;
-            }
-
-            return MapToViewModel(loan);
+                .Include(l => l.User)
+                .Where(l => l.IsActive && l.DueDate < DateTime.Now)
+                .ToListAsync();
         }
 
-        // ---------------------------------------------------------------------
-        // 3. Checkout Book (Create new Loan record)
-        // ---------------------------------------------------------------------
-        /* public async Task CheckoutBookAsync(int bookId, int patronId)
-         {
-             // Optional: Add logic here to check if the book is already checked out!
-             // E.g.: var existingLoan = await _context.Loans.AnyAsync(l => l.BookId == bookId && l.ReturnDate == null);
-
-             var now = DateTime.Now;
-
-             var newLoan = new Loan
-             {
-                 BookId = bookId,
-                 PatronId = patronId,
-                 CheckoutDate = now,
-                 // Business Rule: DueDate is 14 days from checkout
-                 DueDate = now.AddDays(LoanPeriodDays),
-                 ReturnDate = null // Initially null
-             };
-
-             _context.Loans.Add(newLoan);
-             await _context.SaveChangesAsync();
-         }*/
-
-        // 3. Checkout Book (Create new Loan record)
-        public async Task<bool> CheckoutBookAsync(int bookId, int patronId)
+        // Patron Functionality
+        public async Task<IEnumerable<Loan>> GetActiveLoansByUserIdAsync(string userId)
         {
-            // CRITICAL BUSINESS RULE: Prevent Duplicate Checkouts
-            // Check if there is ANY existing loan for this book where ReturnDate is NULL.
-            var isActiveLoan = await _context.Loans
-                .AnyAsync(l => l.BookId == bookId && l.ReturnDate == null);
+            // Loans that are currently active for the Patron
+            return await _context.Loans
+                .Include(l => l.Book)
+                .Where(l => l.UserId == userId && l.IsActive && l.DueDate >= DateTime.Now)
+                .ToListAsync();
+        }
 
-            if (isActiveLoan)
-            {
-                // Return false if the book is already checked out
-                return false;
-            }
+        public async Task<Loan?> GetLoanByIdAsync(int id)
+        {
+            return await _context.Loans
+                .Include(l => l.Book)
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.Id == id);
+        }
 
-            // If the book is available, proceed with checkout
-            var now = DateTime.Now;
+        // 🔑 Implement the Checkout Logic here if you want to use the Service Pattern
+        public async Task<bool> DigitalCheckoutAsync(int bookId, string userId)
+        {
+            // 1. Check for existing active loan
+            bool existingLoan = await _context.Loans
+                .AnyAsync(l => l.BookId == bookId && l.UserId == userId && l.IsActive);
 
+            if (existingLoan) return false; // Already checked out
+
+            // 2. Create the new digital loan record
             var newLoan = new Loan
             {
                 BookId = bookId,
-                PatronId = patronId,
-                CheckoutDate = now,
-                DueDate = now.AddDays(LoanPeriodDays),
-                ReturnDate = null
+                UserId = userId,
+                LoanDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(14),
+                IsActive = true
             };
 
             _context.Loans.Add(newLoan);
             await _context.SaveChangesAsync();
-
-            // Return true for successful checkout
             return true;
         }
 
-        // ---------------------------------------------------------------------
-        // 4. Return Book (Update ReturnDate)
-        // ---------------------------------------------------------------------
-        public async Task<bool> ReturnBookAsync(int id)
+        // Admin Action: Manually End Access for a user
+        public async Task<bool> EndAccessAsync(int loanId)
         {
-            var loan = await _context.Loans.FindAsync(id);
+            var loan = await _context.Loans.FindAsync(loanId);
+            if (loan == null || !loan.IsActive) return false;
 
-            if (loan == null)
-            {
-                return false;
-            }
+            loan.IsActive = false;
+            // Optionally, log the date access was terminated
+            // loan.ReturnDate = DateTime.Now; 
 
-            // Only update if it hasn't already been returned
-            if (loan.ReturnDate == null)
-            {
-                loan.ReturnDate = DateTime.Now;
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            return true; // Already returned, consider it successful
-        }
-
-        // ---------------------------------------------------------------------
-        // 5. Delete Loan
-        // ---------------------------------------------------------------------
-        public async Task<bool> DeleteLoanAsync(int id)
-        {
-            var loan = await _context.Loans.FindAsync(id);
-
-            if (loan == null)
-            {
-                return false;
-            }
-
-            _context.Loans.Remove(loan);
             await _context.SaveChangesAsync();
             return true;
         }
 
-
-        // New method implementation for overdue report
-        public async Task<IEnumerable<LoanViewModel>> GetOverdueLoansAsync()
+        public async Task<bool> DeleteLoanAsync(int loanId)
         {
-            var overdueLoans = await _context.Loans
-                .Include(l => l.Book)
-                .Include(l => l.Patron)
-                // WHERE clause: ReturnDate is NULL AND DueDate is before today
-                .Where(l => l.ReturnDate == null && l.DueDate.Date < DateTime.Now.Date)
-                .ToListAsync();
+            var loan = await _context.Loans.FindAsync(loanId);
+            if (loan == null) return false;
 
-            // Map the filtered entities to ViewModels
-            return overdueLoans.Select(MapToViewModel).ToList();
+            _context.Loans.Remove(loan);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

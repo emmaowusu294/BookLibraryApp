@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = ViewData["Title"] ?? "Read Digital Book";
+    string bookTitle = ViewData["BookTitle"] as string;
+    int bookId = (int)(ViewData["BookId"] ?? 0);
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-4 text-primary mb-4">
+                Digital Access: @bookTitle
+            </h1>
+
+            <div class="alert alert-success" role="alert">
+                <i class="bi bi-book-half"></i> You currently have active digital access to this content.
+            </div>
+
+            <hr />
+
+            <div class="card p-4 shadow">
+                <h3>Welcome to the Reading View</h3>
+                <p class="lead">
+                    This is where the digital copy of the book would be displayed.
+                    You can integrate an e-reader component, or simply display the text content here.
+                </p>
+                <div class="border p-3 mt-3 bg-light text-center">
+                    <p class="mb-0 text-muted">--- SAMPLE BOOK CONTENT START ---</p>
+                    <p>
+                        "The library was a silent, sacred space, a sanctuary built not of stone and mortar, but of ink and imagination. Every book contained a universe, and every user, a key to unlock it."
+                    </p>
+                    <p class="mb-0 text-muted">--- SAMPLE BOOK CONTENT END ---</p>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a asp-controller="Loan" asp-action="MyLoans" class="btn btn-info btn-lg me-2">
+                    <i class="bi bi-list-check"></i> View My Loans
+                </a>
+
+                @* Optional: Button to end access early *@
+                <form asp-controller="Loan" asp-action="EndAccess" asp-route-id="@* You'd need the LoanId here, but for simplicity, linking to MyLoans is fine *@ " method="post" style="display:inline;">
+                    @* We don't have the LoanId easily available here, so just link to MyLoans *@
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

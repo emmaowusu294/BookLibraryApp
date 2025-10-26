@@ -134,9 +134,13 @@ namespace BookLibraryApp.Services
 
         public async Task<IEnumerable<BookViewModel>> GetAvailableBooksAsync()
         {
-            // 1. Get IDs of all books currently out on loan (ReturnDate is null)
+            // For a digital library, 'available' usually means 'not currently out to THIS user',
+            // but this method looks like it's designed to track global physical availability.
+            // If you need global tracking, we check for ANY active, non-expired loan.
+
+            // 1. Get IDs of all books currently out on loan (IsActive = true)
             var checkedOutBookIds = await _context.Loans
-                .Where(l => l.ReturnDate == null)
+                .Where(l => l.IsActive) // 🔑 CHANGE: Use IsActive instead of checking ReturnDate
                 .Select(l => l.BookId)
                 .ToListAsync();
 

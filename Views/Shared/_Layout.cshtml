@@ -21,7 +21,21 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BookLibraryApp</a>
+                @* The ASP.NET Core Tag Helper logic below checks if the user is authenticated: *@
+                @if (User.Identity.IsAuthenticated)
+                {
+                    @* LOGGED-IN: Directs to our new controller, which handles role-based redirection *@
+                    <a class="navbar-brand" asp-area="" asp-controller="UserRedirect" asp-action="Index">
+                        Online Library
+                    </a>
+                }
+                else
+                {
+                    @* LOGGED-OUT: Directs to the public marketing landing page *@
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                        Online Library
+                    </a>
+                }
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -29,10 +43,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
 
-                        @* Public Links: Catalog is visible to everyone *@
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Index">Catalog</a>
-                        </li>
+                       
 
                         @* Admin/Staff Links: You might want to wrap these in an authorization check later (e.g., if (User.IsInRole("Admin"))), but for now, we'll keep them visible *@
                         @if (SignInManager.IsSignedIn(User))
@@ -43,13 +54,26 @@
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Index">Books</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Patron" asp-action="Index">Patrons</a>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="AdminLoan" asp-action="Index">Active Loans</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Loan" asp-action="Index">Loans</a>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="AdminLoan" asp-action="History">Full Loan History</a>
                                     </li>
+
                                 }
-                        }
+
+
+                            }
+                            else
+                            {
+                                @* Public Links: Catalog is visible to everyone *@
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Index">Catalog</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Loan" asp-action="MyLoans">My Loans</a>
+                                </li>
+                            }
 
                     </ul>
 

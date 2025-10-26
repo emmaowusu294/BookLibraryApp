@@ -1,180 +1,127 @@
-﻿using BookLibraryApp.Services;
-using BookLibraryApp.Models.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+//using BookLibraryApp.Data; // Assuming this is where LibraryDbContext lives
+using BookLibraryApp.Models.Entities;
 
 namespace BookLibraryApp.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    // The Loan features here are for ALL LOGGED-IN USERS (Patrons)
+    [Authorize]
     public class LoanController : Controller
     {
-        private readonly ILoanService _loanService;
-        private readonly IBookService _bookService; // Need for dropdowns
-        private readonly IPatronService _patronService; // Need for dropdowns
+        private readonly LibraryDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        // Injecting all three required services
-        public LoanController(
-            ILoanService loanService, 
-            IBookService bookService, 
-            IPatronService patronService)
+        // Inject the DbContext and UserManager
+        public LoanController(LibraryDbContext context, UserManager<IdentityUser> userManager)
         {
-            _loanService = loanService;
-            _bookService = bookService;
-            _patronService = patronService;
+            _context = context;
+            _userManager = userManager;
         }
 
-        // Helper method to load Patrons and *Available* Books into ViewBag
-        private async Task LoadDropdownsAsync()
+        // GET: /Loan (Default Action)
+        // Redirects the base route to the more specific MyLoans action
+        public IActionResult Index()
         {
-            //FIX REQUIRED HERE: Use the new method to get only available books
-            var books = await _bookService.GetAvailableBooksAsync();
-
-            var patrons = await _patronService.GetAllPatrons();
-
-            // Creating SelectList items for the View
-            ViewBag.Books = new SelectList(books, "BookId", "Title");
-            ViewBag.Patrons = new SelectList(patrons, "PatronId", "FullName");
+            return RedirectToAction("MyLoans");
         }
 
-        // ---------------------------------------------------------------------
-        // INDEX (GET: /Loan) - List All Loans
-        // ---------------------------------------------------------------------
-        public async Task<IActionResult> Index()
-        {
-            var loans = await _loanService.GetAllLoansAsync();
-            return View(loans);
-        }
-
-        // ---------------------------------------------------------------------
-        // DETAILS (GET: /Loan/Details/5)
-        // ---------------------------------------------------------------------
-        public async Task<IActionResult> Details(int id)
-        {
-            var loan = await _loanService.GetLoanByIdAsync(id);
-            if (loan == null)
-            {
-                return NotFound();
-            }
-            return View(loan);
-        }
-
-        // ---------------------------------------------------------------------
-        // CHECKOUT (GET: /Loan/Checkout) - Shows the form
-        // ---------------------------------------------------------------------
-       
-        public async Task<IActionResult> Checkout()
-        {
-            await LoadDropdownsAsync();
-            
-            // Initialize the ViewModel with current date defaults
-            var model = new LoanViewModel 
-            {
-                CheckoutDate = DateTime.Now.Date,
-                DueDate = DateTime.Now.Date.AddDays(14)
-            };
-            
-            return View(model);
-        }
-       
-
-
-        // ---------------------------------------------------------------------
-// CHECKOUT (POST: /Loan/Checkout) - Handles the form submission
-// ---------------------------------------------------------------------
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Checkout([Bind("BookId,PatronId")] LoanViewModel model)
-{
-    // Reload dropdowns in case we need to return the view with errors
-    await LoadDropdownsAsync();
-
-    if (ModelState.IsValid)
-    {
-        // Await the service call, which now returns true/false
-        bool success = await _loanService.CheckoutBookAsync(model.BookId, model.PatronId);
-
-        if (success)
-        {
-            return RedirectToAction(nameof(Index));
-        }
-        else
-        {
-            //  If success is false, add a model error
-            ModelState.AddModelError(string.Empty, "This book is currently checked out and unavailable for loan.");
-            
-            // Re-select the book/patron IDs to keep them visible in the form
-            model.BookId = model.BookId;
-            model.PatronId = model.PatronId;
-        }
-    }
-
-    // If validation fails OR checkout fails, return to the view with errors
-    return View(model);
-}
-      
-        
-        
-        // ---------------------------------------------------------------------
-        // RETURN (POST: /Loan/Return/5) - Handles returning a book
-        // ---------------------------------------------------------------------
+        // POST: Loan/Checkout/5
+        // This action is called when a user clicks the 'Borrow' button on a Book's page.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Return(int id)
+        public async Task<IActionResult> Checkout(int id) // 'id' is the BookId
         {
-            bool success = await _loanService.ReturnBookAsync(id);
+            // 1. Get the current logged-in user's ID
+            var userId = _userManager.GetUserId(User);
 
-            if (!success)
+            if (userId == null)
             {
-                // This might mean the loan ID was invalid or already returned
-                return NotFound();
+                return Unauthorized("User ID could not be retrieved.");
             }
 
-            return RedirectToAction(nameof(Index));
-        }
-
-        // DELETE (GET: /Loan/Delete/5)
-        // This action fetches the record and sends it to the Delete.cshtml view for confirmation.
-        // ---------------------------------------------------------------------
-
-        public async Task<IActionResult> Delete(int id)
-        {
-            var loan = await _loanService.GetLoanByIdAsync(id);
-            if (loan == null)
+            // 2. Check if the book exists
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
             {
-                return NotFound();
+                return NotFound($"Book with ID {id} was not found.");
             }
 
-            return View(loan);
+            // 3. Check for existing active loan for this book and user
+            bool existingActiveLoan = await _context.Loans
+                .AnyAsync(l => l.BookId == id && l.UserId == userId && l.IsActive);
+
+            if (existingActiveLoan)
+            {
+                TempData["Warning"] = $"You already have active digital access to '{book.Title}'.";
+                // 🔑 FIX 1: Redirect user to the reading view in the public CatalogController
+                return RedirectToAction("Read", "Catalog", new { id = book.BookId });
+            }
+
+            // 4. Create the new digital loan record
+            var newLoan = new Loan
+            {
+                BookId = id,
+                UserId = userId,
+                LoanDate = DateTime.Now,
+                // Digital access lasts for 14 days
+                DueDate = DateTime.Now.AddDays(14),
+                IsActive = true
+            };
+
+            _context.Loans.Add(newLoan);
+            await _context.SaveChangesAsync();
+
+            // 5. Success: Redirect the user to the reading view
+            TempData["Success"] = $"Successfully gained digital access to '{book.Title}' for 14 days. Enjoy!";
+
+            // 🔑 FIX 2: Redirect the user to the reading view in the public CatalogController
+            return RedirectToAction("Read", "Catalog", new { id = book.BookId });
         }
 
-        // ---------------------------------------------------------------------
-        // DELETE (POST: /Loan/Delete/5)
-        // ---------------------------------------------------------------------
-        // Typically a POST to avoid accidental deletion via GET link
-        [HttpPost, ActionName("Delete")] 
+        // GET: Loan/MyLoans
+        // Shows the user all their currently active digital loans
+        public async Task<IActionResult> MyLoans()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var activeLoans = await _context.Loans
+                .Include(l => l.Book)
+                .Where(l => l.UserId == userId && l.IsActive)
+                .ToListAsync();
+
+            return View(activeLoans);
+        }
+
+        // POST: Loan/EndAccess/5
+        // Allows a user to manually end their digital access early (return the book).
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> EndAccess(int id) // 'id' is the LoanId
         {
-            bool success = await _loanService.DeleteLoanAsync(id);
+            var userId = _userManager.GetUserId(User);
 
-            if (!success)
+            // Fetch the loan, including the book for a good success message
+            var loan = await _context.Loans.Include(l => l.Book).FirstOrDefaultAsync(l => l.Id == id);
+
+            // Safety check: Ensure loan exists, is active, and belongs to the current user
+            if (loan == null || loan.UserId != userId || !loan.IsActive)
             {
-                return NotFound();
+                TempData["Error"] = "Cannot end access for an invalid or inactive loan.";
+                return RedirectToAction("MyLoans");
             }
 
-            return RedirectToAction(nameof(Index));
-        }
+            // Set the loan to inactive
+            loan.IsActive = false;
+            await _context.SaveChangesAsync();
 
-
-        // ---------------------------------------------------------------------
-        // OVERDUE REPORT (GET: /Loan/Overdue)
-        // ---------------------------------------------------------------------
-        public async Task<IActionResult> Overdue()
-        {
-            var overdueLoans = await _loanService.GetOverdueLoansAsync();
-
-            return View(overdueLoans);
+            TempData["Success"] = $"Digital access to '{loan.Book.Title}' has been ended.";
+            return RedirectToAction("MyLoans");
         }
     }
 }

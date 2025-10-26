@@ -1,0 +1,45 @@
+﻿@model List<BookLibraryApp.Models.Entities.Loan>
+
+@{
+    ViewData["Title"] = "Admin: All Active Loans";
+}
+
+<h2>All Active Digital Loans</h2>
+<hr />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Loan ID</th>
+            <th>Book Title</th>
+            <th>User ID</th>
+            <th>Loan Date</th>
+            <th>Due Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.Book.Title)</td>
+                <td>@Html.DisplayFor(modelItem => item.UserId)</td>
+                <td>@Html.DisplayFor(modelItem => item.LoanDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
+                <td>
+                    <form asp-action="ForceEnd" asp-route-id="@item.Id" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger"
+                                onclick="return confirm('WARNING: Are you sure you want to FORCEFULLY end this loan?');">
+                            Force End
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>
+    <a asp-action="History">View Full Loan History</a>
+</p>

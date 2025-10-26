@@ -1,0 +1,70 @@
+﻿@model BookLibraryApp.Controllers.UserViewModel
+@using Microsoft.AspNetCore.Identity
+
+@{
+    ViewData["Title"] = $"Manage User: {Model.User.Email}";
+    // Check if the current user is an admin
+    bool isAdmin = Model.Roles.Contains("Admin");
+}
+
+<h2>Manage User: @Model.User.Email</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>User Information</h4>
+        <dl class="row">
+            <dt class="col-sm-4">User ID:</dt>
+            <dd class="col-sm-8">@Model.User.Id</dd>
+
+            <dt class="col-sm-4">Username:</dt>
+            <dd class="col-sm-8">@Model.User.UserName</dd>
+
+            <dt class="col-sm-4">Email Confirmed:</dt>
+            <dd class="col-sm-8">@(Model.User.EmailConfirmed ? "Yes" : "No")</dd>
+
+            <dt class="col-sm-4">Account Locked:</dt>
+            <dd class="col-sm-8">@(Model.User.LockoutEnd > DateTimeOffset.Now ? "Yes (Locked until: " + Model.User.LockoutEnd.ToString() + ")" : "No")</dd>
+        </dl>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Role Management</h4>
+        <p>
+            Current Roles:
+            @foreach (var role in Model.Roles)
+            {
+                <span class="badge @(role == "Admin" ? "bg-danger" : "bg-info")">@role</span>
+            }
+        </p>
+
+        @if (!isAdmin)
+        {
+            <form asp-action="PromoteToAdmin" asp-route-id="@Model.User.Id" method="post">
+                <button type="submit" class="btn btn-danger mt-2"
+                        onclick="return confirm('Confirm promotion of @Model.User.Email to Admin?');">
+                    Promote to Admin
+                </button>
+            </form>
+        }
+        else
+        {
+            <p class="text-success mt-2">This user is currently an Administrator.</p>
+            @* You could add a Demote action here, but be careful not to demote yourself! *@
+        }
+
+        <h4 class="mt-4">Administrative Actions</h4>
+        <a asp-action="Index" class="btn btn-secondary">Back to User List</a>
+
+        @* Add delete button (safe guard against deleting yourself) *@
+        @if (!User.Identity.Name.Equals(Model.User.UserName, StringComparison.OrdinalIgnoreCase))
+        {
+            <form asp-action="DeleteUser" asp-route-id="@Model.User.Id" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger"
+                        onclick="return confirm('PERMANENTLY DELETE @Model.User.Email? This action cannot be undone.');">
+                    Delete User
+                </button>
+            </form>
+        }
+    </div>
+</div>

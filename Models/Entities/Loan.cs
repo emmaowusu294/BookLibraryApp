@@ -1,37 +1,44 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity; // Required for IdentityUser
 
 namespace BookLibraryApp.Models.Entities
 {
+    // Note: If you don't have an "Entities" subfolder, adjust the namespace
     public class Loan
     {
         // Primary Key for the Loan transaction
         [Key]
-        public int LoanId { get; set; }
+        public int Id { get; set; } // Renamed for common convention
 
         // Foreign Key to the Book entity
         public int BookId { get; set; }
 
-        // Foreign Key to the Patron entity
-        public int PatronId { get; set; }
+        // 🔑 REPLACEMENT: Foreign Key to the IdentityUser (the Patron/Reader)
+        // IdentityUser IDs are strings (GUIDs)
+        public required string UserId { get; set; }
 
-        // Date the book was checked out (required)
-        public DateTime CheckoutDate { get; set; } = DateTime.Now; // Set a default value
+        // Date the digital access started
+        public DateTime LoanDate { get; set; } = DateTime.Now;
 
-        // Date the book is due back (e.g., 14 days after checkout)
+        // Date the digital access is due to expire
         public DateTime DueDate { get; set; }
 
-        // Date the book was returned (null if still checked out)
-        public DateTime? ReturnDate { get; set; }
+        // 🔑 REMOVED: ReturnDate is no longer needed for digital access, 
+        // we use IsActive to determine current access.
+
+        // Status to track if access is currently active (e.g., within the 14-day window)
+        public bool IsActive { get; set; } = true;
 
         // --------------------------------------------------------
-        // Navigation Properties (Used by EF Core for relationships)
+        // Navigation Properties 
         // --------------------------------------------------------
 
         [ForeignKey("BookId")]
         public virtual Book Book { get; set; } = null!;
 
-        [ForeignKey("PatronId")]
-        public virtual Patron Patron { get; set; } = null!;
+        // 🔑 REPLACEMENT: Link to the IdentityUser
+        [ForeignKey("UserId")]
+        public virtual IdentityUser User { get; set; } = null!;
     }
 }

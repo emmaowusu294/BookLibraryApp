@@ -1,72 +1,76 @@
-﻿using BookLibraryApp.Models.ViewModels;
+﻿
+using BookLibraryApp.Models.Entities;
+using BookLibraryApp.Models.ViewModels;
 using BookLibraryApp.Services; // Contains the IBookService interface
 using Microsoft.AspNetCore.Authorization;
+// 🔑 NEW USING STATEMENTS
+using Microsoft.AspNetCore.Identity; // Needed for UserManager
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks; // Required for async/await
+using Microsoft.EntityFrameworkCore; // Needed for .AnyAsync() and DbContext access
+using System.Threading.Tasks;
+
 
 namespace BookLibraryApp.Controllers
 {
+    // The main actions for Index, Create, Edit, Delete are restricted to Admin
     [Authorize(Roles = "Admin")]
     public class BookController : Controller
     {
         // 1. Dependency Injection: Use the INTERFACE (IBookService)
         private readonly IBookService _bookService;
 
-        public BookController(IBookService bookService)
+        // 🔑 REQUIRED FIX: Define private fields for the new dependencies
+        private readonly LibraryDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+
+        // 🔑 REQUIRED FIX: Update the constructor to accept the new dependencies
+        public BookController(
+            IBookService bookService,
+            LibraryDbContext context,
+            UserManager<IdentityUser> userManager)
         {
             _bookService = bookService;
+            _context = context; // Initialize the injected DbContext
+            _userManager = userManager; // Initialize the injected UserManager
         }
 
         // ---------------------------------------------------------------------
         // GET: Book (Index)
         // ---------------------------------------------------------------------
-        // Now 'async' and returns 'Task<IActionResult>'
-        // GET: Book (Index)
-        // Add the searchString parameter
         public async Task<IActionResult> Index(string searchString)
         {
-            // Pass the search string to the service method
             var books = await _bookService.GetAllBooksAsync(searchString);
-
-            // This keeps the search term in the search box after filtering
             ViewData["CurrentFilter"] = searchString;
-
             return View(books);
         }
 
         // ---------------------------------------------------------------------
-        // GET: Book/Create
+        // GET: Book/Create (and POST: Book/Create)
         // ---------------------------------------------------------------------
-        // No DB calls, so it can remain synchronous (returns 'IActionResult')
         public IActionResult Create()
         {
             return View();
         }
 
-        // ---------------------------------------------------------------------
-        // POST: Book/Create
-        // ---------------------------------------------------------------------
-        // Now 'async' and returns 'Task<IActionResult>'
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(BookViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Use 'await'
                 await _bookService.AddBookAsync(model);
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
         }
 
+
+
         // ---------------------------------------------------------------------
-        // GET: Book/Edit/5
+        // GET: Book/Edit/5 (and POST: Book/Edit/5)
         // ---------------------------------------------------------------------
-        // Now 'async' and returns 'Task<IActionResult>'
         public async Task<IActionResult> Edit(int id)
         {
-            // Use 'await'
             var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
             {
@@ -75,19 +79,14 @@ namespace BookLibraryApp.Controllers
             return View(book);
         }
 
-        // ---------------------------------------------------------------------
-        // POST: Book/Edit/5
-        // ---------------------------------------------------------------------
-        // Now 'async' and returns 'Task<IActionResult>'
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(BookViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Use 'await'
                 bool success = await _bookService.UpdateBookAsync(model);
-                if (!success) // Check if the update failed (e.g., book not found)
+                if (!success)
                 {
                     return NotFound();
                 }
@@ -97,12 +96,10 @@ namespace BookLibraryApp.Controllers
         }
 
         // ---------------------------------------------------------------------
-        // GET: Book/Delete/5
+        // GET: Book/Delete/5 (and POST: Book/Delete/5)
         // ---------------------------------------------------------------------
-        // Now 'async' and returns 'Task<IActionResult>'
         public async Task<IActionResult> Delete(int id)
         {
-            // Use 'await'
             var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
             {
@@ -111,24 +108,20 @@ namespace BookLibraryApp.Controllers
             return View(book);
         }
 
-        // ---------------------------------------------------------------------
-        // POST: Book/Delete/5
-        // ---------------------------------------------------------------------
-        // Now 'async' and returns 'Task<IActionResult>'
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // Use 'await'
             bool success = await _bookService.DeleteBookAsync(id);
 
-            // It's good practice to check if the delete was successful
             if (!success)
             {
                 return NotFound();
             }
-
             return RedirectToAction(nameof(Index));
         }
+
+
+        
     }
 }

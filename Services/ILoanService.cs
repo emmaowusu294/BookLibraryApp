@@ -1,21 +1,29 @@
-﻿using BookLibraryApp.Models.ViewModels;
+﻿using BookLibraryApp.Models.Entities;
 
 namespace BookLibraryApp.Services
 {
     public interface ILoanService
     {
-        Task<IEnumerable<LoanViewModel>> GetAllLoansAsync();
-        Task<LoanViewModel?> GetLoanByIdAsync(int id);
+        // For Admin View: Fetch all loans with related Book and User data
+        Task<IEnumerable<Loan>> GetAllLoansAsync();
 
-        // This method needs to pull the DueDate from the service logic
-        Task<bool> CheckoutBookAsync(int bookId, int patronId);
+        // For Admin View: Fetch all overdue/expired digital loans
+        Task<IEnumerable<Loan>> GetOverdueLoansAsync();
 
-        // This method updates the ReturnDate
-        Task<bool> ReturnBookAsync(int id);
+        // For Patron/Self-Service: Get all active loans for a specific User
+        Task<IEnumerable<Loan>> GetActiveLoansByUserIdAsync(string userId);
 
-        Task<bool> DeleteLoanAsync(int id);
+        // Gets a single loan record
+        Task<Loan?> GetLoanByIdAsync(int id);
 
-        //  New method signature for overdue report
-        Task<IEnumerable<LoanViewModel>> GetOverdueLoansAsync();
+        // 🔑 Simplified Checkout for Patron Self-Service
+        // This is now an internal service method. The Controller handles the Identity check.
+        Task<bool> DigitalCheckoutAsync(int bookId, string userId);
+
+        // Return is now an "End Access" action for Admins to manually stop access
+        Task<bool> EndAccessAsync(int loanId);
+
+        // Admin-only: Deletes a loan record
+        Task<bool> DeleteLoanAsync(int loanId);
     }
 }
