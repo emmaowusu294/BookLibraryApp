@@ -1,9 +1,11 @@
-﻿using BookLibraryApp.Services;
-using BookLibraryApp.Models.ViewModels;
+﻿using BookLibraryApp.Models.ViewModels;
+using BookLibraryApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookLibraryApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     // The PatronController will handle all HTTP requests for the Patron module.
     public class PatronController : Controller
     {

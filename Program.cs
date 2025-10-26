@@ -1,4 +1,4 @@
-using BookLibraryApp.Models.Entities;
+﻿using BookLibraryApp.Models.Entities;
 using BookLibraryApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ---------------------------------------------------------------------
 // 1. Add Identity services (Must be before builder.Services.AddControllersWithViews())
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>() //THIS LINE enables role management
     .AddEntityFrameworkStores<LibraryDbContext>();
 
 // 2. Add Razor Pages support for Identity UI views
@@ -66,4 +67,19 @@ app.MapControllerRoute(
 app.MapRazorPages(); // <-- Required for Identity UI
 
 
+
+//   this block to call the role initializer on startup
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    try
+    {
+        await BookLibraryApp.Areas.Identity.Data.DbInitializer.InitializeAsync(serviceProvider);
+    }
+    catch (Exception ex)
+    {
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database with roles.");
+    }
+}
 app.Run();

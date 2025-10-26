@@ -1,0 +1,239 @@
+﻿/* ==================================================================== */
+/* AUTHENTICATION LAYOUT STYLES                                         */
+/* ==================================================================== */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100vh !important; /* Ensure they fill the viewport precisely */
+    overflow: hidden !important; /* Kill all scrolling */
+    width: 100% !important;
+    min-height: 100vh !important;
+}
+/* Full-screen container setup */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    font-family: var(--font-primary);
+    height: 100vh;
+    overflow-y: auto; /* If the form is too tall, let the container scroll */
+}
+
+/* Main form area container */
+.auth-form-container {
+    background-color: var(--white-color);
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 450px;
+    padding: 40px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Wrapper for content inside the form container */
+.auth-form-wrapper {
+    text-align: center;
+}
+
+/* Logo and Branding */
+.logo {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 25px;
+}
+
+    .logo i {
+        margin-right: 10px;
+    }
+
+.auth-form-wrapper h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: var(--dark-color);
+    text-align: center;
+}
+
+.auth-subtitle {
+    font-size: 15px;
+    color: var(--gray-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.auth-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+    .auth-link:hover {
+        color: var(--accent-color);
+        text-decoration: underline;
+    }
+
+/* Divider for separating login options */
+.divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    color: var(--gray-color);
+}
+
+    .divider span {
+        background: var(--white-color);
+        padding: 0 15px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: #e0e0e0;
+        z-index: 1;
+    }
+
+/* Form Styling */
+.auth-form .form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+    .auth-form .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--dark-color);
+    }
+
+/* Input field with icon styling */
+.input-with-icon {
+    position: relative;
+}
+
+    .input-with-icon i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-color);
+        font-size: 16px;
+        transition: color 0.3s;
+    }
+
+    .input-with-icon .form-control {
+        width: 100%;
+        padding: 12px 12px 12px 45px; /* Added left padding for icon */
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+        .input-with-icon .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(110, 72, 170, 0.1);
+        }
+
+/* Form options (Remember Me and Forgot Password) */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
+/* Checkbox specific styling */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+    .checkbox-group input[type="checkbox"] {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--gray-color);
+        border-radius: 4px;
+        margin-right: 8px;
+        cursor: pointer;
+        position: relative;
+    }
+
+        .checkbox-group input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+            .checkbox-group input[type="checkbox"]:checked::before {
+                content: '\f00c'; /* Font Awesome checkmark icon */
+                font-family: 'Font Awesome 6 Free';
+                font-weight: 900;
+                color: var(--white-color);
+                font-size: 12px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+    .checkbox-group label {
+        margin-bottom: 0;
+    }
+
+/* Submit button */
+.auth-btn {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .auth-btn:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(110, 72, 170, 0.3);
+    }
+
+/* Footer for auth pages */
+.auth-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+    .auth-footer p {
+        font-size: 13px;
+        color: var(--gray-color);
+        margin-bottom: 0;
+    }
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+    .auth-form-container {
+        padding: 30px 20px;
+    }
+
+    .auth-form-wrapper h1 {
+        font-size: 24px;
+    }
+}

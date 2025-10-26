@@ -1,10 +1,12 @@
 ﻿using BookLibraryApp.Models.ViewModels;
 using BookLibraryApp.Services; // Contains the IBookService interface
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks; // Required for async/await
 
 namespace BookLibraryApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class BookController : Controller
     {
         // 1. Dependency Injection: Use the INTERFACE (IBookService)

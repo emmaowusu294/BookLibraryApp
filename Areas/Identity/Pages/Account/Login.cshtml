@@ -3,78 +3,81 @@
 
 @{
     ViewData["Title"] = "Log in";
+    Layout = null; // We use Layout = null because the auth page is full-screen, not wrapped in the _Layout.
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h2>Use a local account to log in.</h2>
-                <hr />
+
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+
+<div class="auth-container">
+    <div class="auth-form-container">
+        <div class="auth-form-wrapper">
+
+            @* Update the logo/brand for your Online Library *@
+            <div class="logo"><i class="fas fa-book-reader"></i> Online Library</div>
+            <h1>Sign in to your account</h1>
+            <p class="auth-subtitle">
+                New to the library? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="auth-link">Create an account</a>
+            </p>
+
+            <form id="account" method="post" class="auth-form">
+
+                @* **NOTE:** We are skipping the social login buttons for now, 
+                   as that requires Firebase/external provider configuration. 
+                   We focus on Email/Password first. *@
+
+                <div class="divider"><span>or</span></div>
+
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
+
+                <div class="form-group">
+                    <label asp-for="Input.Email">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input asp-for="Input.Email" placeholder="you@example.com" class="form-control" autocomplete="username" aria-required="true" />
+                    </div>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
+
+                <div class="form-group">
+                    <label asp-for="Input.Password">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input asp-for="Input.Password" placeholder="Enter your password" class="form-control" autocomplete="current-password" aria-required="true" />
+                        @* Optional: You can re-add the toggle-password button if you implement the JS *@
+                    </div>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
-                <div class="checkbox mb-3">
-                    <label asp-for="Input.RememberMe" class="form-label">
+
+                <div class="form-options">
+                    <div class="checkbox-group">
                         <input class="form-check-input" asp-for="Input.RememberMe" />
-                        @Html.DisplayNameFor(m => m.Input.RememberMe)
-                    </label>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </form>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
+                        <label asp-for="Input.RememberMe" class="form-check-label">
+                            @Html.DisplayNameFor(m => m.Input.RememberMe)
+                        </label>
                     </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
+                    <a id="forgot-password" asp-page="./ForgotPassword" class="auth-link">Forgot password?</a>
+                </div>
+
+                <button id="login-submit" type="submit" class="auth-btn">Sign In</button>
+
+            </form>
+
+            @* Optional: External logins if you need them later *@
+            @if (Model.ExternalLogins?.Count > 0)
+            {
+                <partial name="_ExternalLogins" model="Model.ExternalLogins" />
             }
-        </section>
+
+        </div>
+
+        <footer class="auth-footer">
+            <p>© @DateTime.Now.Year Online Library. All rights reserved.</p>
+        </footer>
     </div>
 </div>
 

@@ -2,9 +2,11 @@
 using BookLibraryApp.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookLibraryApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService;

@@ -1,8 +1,97 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Your Digital Library - Instant Access to Knowledge";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+
+<section class="hero" style="padding-top: 50px; padding-bottom: 100px;">
+    <div class="container">
+        <div class="hero-content">
+            <h1>The Future of Reading is Digital is HERE!!.</h1>
+            <p>
+                Welcome to your premium online library. <span class="fw-bold">Gain seamless 24/7 access</span> to a focused, curated collection of digital books and resources—all you need is a free account to begin your reading journey instantly.
+            </p>
+            <div class="hero-buttons">
+                @* Button for Patrons to view the collection *@
+                <a asp-controller="Books" asp-action="Index" class="btn btn-primary">
+                    Start Reading Now <i class="fas fa-book-reader" style="margin-left: 5px;"></i>
+                </a>
+
+                @* Button directs to the login/register for new patrons *@
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-secondary">
+                    Register for Free Access <i class="fas fa-user-plus" style="margin-left: 5px;"></i>
+                </a>
+            </div>
+        </div>
+
+        @* Hero image placeholder - using a relevant digital/tablet theme *@
+        <div class="hero-image">
+            <img src="https://images.pexels.com/photos/21525425/pexels-photo-21525425.jpeg" alt="Online Reading Platform" />
+        </div>
+    </div>
+</section>
+
+<section id="features" class="features">
+    <div class="container">
+        <h2>Why Choose Our Digital Library?</h2>
+        <p class="section-subtitle">
+            Experience the convenience and depth of a curated online reading resource.
+        </p>
+
+        <div class="features-grid">
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-tablet-alt"></i> @* Icon for Digital Access *@
+                </div>
+                <h3>Instant Digital Access</h3>
+                <p>
+                    Check out books instantly and read them on any device—no waiting and no physical returns required.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-shield"></i> @* Icon for Secured Access *@
+                </div>
+                <h3>Secured Reader Accounts</h3>
+                <p>
+                    Manage your personal reading list, view your loan history, and enjoy secure access to your chosen titles.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-book-open"></i> @* Icon for Diverse Catalog *@
+                </div>
+                <h3>Curated Collection</h3>
+                <p>
+                    Every title is hand-selected and categorized by the site administrators for quality and relevance.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cogs"></i> @* Icon for Admin Management (You) *@
+                </div>
+                <h3>Admin Maintained</h3>
+                <p>
+                    Books, user access, and loans are actively managed by a dedicated administrator to ensure smooth operations.
+                </p>
+                @* <a asp-controller="Home" asp-action="AdminDashboard" class="feature-link">
+                    Admin Portal <i class="fas fa-arrow-right"></i>
+                </a> *@
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2>Start Your Digital Journey Today</h2>
+        <p>
+            Join our community of readers and gain immediate online access to a world of knowledge.
+        </p>
+    </div>
+</section>
