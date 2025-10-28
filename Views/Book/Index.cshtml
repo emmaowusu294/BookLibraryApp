@@ -1,67 +1,65 @@
 ﻿@model IEnumerable<BookLibraryApp.Models.ViewModels.BookViewModel>
 
 @{
-    ViewData["Title"] = "Book List";
+    ViewData["Title"] = "Manage Books";
 }
 
 <div class="container" style="padding-top: 50px;">
 
-    <h1 class="text-center">Library Books</h1>
+    <h1 class="text-center">Manage Books</h1>
 
     <form asp-controller="Book" asp-action="Index" method="get" class="mb-4">
         <div class="input-group">
-
-            @* Input field for the search query *@
             <input type="text"
                    name="searchString"
                    value="@ViewData["CurrentFilter"]"
                    class="form-control"
-                   placeholder="Search by Title or Author....." />
-
-            @* Search Button *@
+                   placeholder="Search by Title or Author..." />
             <button class="btn btn-primary" type="submit">
-                <i class="bi bi-search"></i> Search
+                <i class="fas fa-search"></i> Search @* Changed icon class for Font Awesome *@
             </button>
-
-            @* Clear Filter Button - Navigates back to the Index without a searchString *@
             <a asp-action="Index" class="btn btn-outline-secondary">Clear Filter</a>
-
-            @* Button to navigate to the Create view *@
             <a asp-action="Create" class="btn btn-success">Add New Book</a>
         </div>
     </form>
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover align-middle">
+        @* align-middle helps center image vertically *@
         <thead>
             <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Title)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.AuthorName)
-                </th>
+                <th>Cover</th> @* 👈 New Column *@
+                <th>@Html.DisplayNameFor(model => model.Title)</th>
+                <th>@Html.DisplayNameFor(model => model.AuthorName)</th>
+                <th>@Html.DisplayNameFor(model => model.Genre)</th> @* 👈 New Column *@
+                <th>@Html.DisplayNameFor(model => model.PublicationYear)</th> @* 👈 New Column *@
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @* Check if any results were found *@
             @if (!Model.Any())
             {
                 <tr>
-                    <td colspan="3" class="text-center text-muted">No books found matching the current criteria.</td>
+                    <td colspan="6" class="text-center text-muted">No books found matching the current criteria.</td> @* 👈 Updated colspan *@
                 </tr>
             }
-
             @foreach (var item in Model)
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Title)
+                        @* 👈 New Cell: Display Cover Image Thumbnail *@
+                        @if (!string.IsNullOrEmpty(item.CoverImageUrl))
+                        {
+                            <img src="@item.CoverImageUrl" alt="Cover for @item.Title" style="max-height: 50px; border-radius: 3px;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted small">No Image</span>
+                        }
                     </td>
+                    <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                    <td>@Html.DisplayFor(modelItem => item.AuthorName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Genre)</td> @* 👈 New Cell *@
+                    <td>@Html.DisplayFor(modelItem => item.PublicationYear)</td> @* 👈 New Cell *@
                     <td>
-                        @Html.DisplayFor(modelItem => item.AuthorName)
-                    </td>
-                    <td>
-                        @* Action links for the current book *@
                         <a asp-action="Edit" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Edit</a> |
                         <a asp-action="Delete" asp-route-id="@item.BookId" class="btn btn-sm btn-danger">Delete</a>
                     </td>
@@ -69,5 +67,4 @@
             }
         </tbody>
     </table>
-
- </div>
+</div>
