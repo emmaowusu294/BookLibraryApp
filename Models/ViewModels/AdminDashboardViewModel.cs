@@ -7,6 +7,7 @@ namespace BookLibraryApp.Models.ViewModels
         // Core Counts
         public int TotalBooks { get; set; }
         public int TotalActiveLoans { get; set; }
+        public int TotalEndedLoans { get; set; }
         public int TotalPatrons { get; set; }
 
         // Loan/Activity Insights

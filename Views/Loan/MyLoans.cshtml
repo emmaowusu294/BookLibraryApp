@@ -4,46 +4,50 @@
     ViewData["Title"] = "My Active Loans";
 }
 
-<h2>My Active Digital Access</h2>
-<hr />
+<div class="container"> 
 
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-info" role="alert">
-        You currently have no active digital access to any books.
-    </div>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Book Title</th>
-                <th>Access Start Date</th>
-                <th>Due Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+    <h2>My Active Digital Access</h2>
+    <hr />
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            You currently have no active digital access to any books.
+        </div>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => item.Book.Title)</td>
-                    <td>@Html.DisplayFor(modelItem => item.LoanDate)</td>
-                    <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
-                    <td>
-                        @* {{-- 🔑 FIX: Add the Read Book link --}} *@
-                        <a asp-controller="Catalog" asp-action="Read" asp-route-id="@item.BookId" class="btn btn-sm btn-primary">Read Book</a>
-
-                        <form asp-action="EndAccess" asp-route-id="@item.Id" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-warning"
-                                    onclick="return confirm('Are you sure you want to end digital access for @item.Book.Title?');">
-                                End Access
-                            </button>
-                        </form>
-                    </td>
+                    <th>Book Title</th>
+                    <th>Access Start Date</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.Book.Title)</td>
+                        <td>@Html.DisplayFor(modelItem => item.LoanDate)</td>
+                        <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
+                        <td>
+                            @* {{-- 🔑 FIX: Add the Read Book link --}} *@
+                            <a asp-controller="Catalog" asp-action="Read" asp-route-id="@item.BookId" class="btn btn-sm btn-primary">Read Book</a>
+
+                            <form asp-action="EndAccess" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-warning"
+                                        onclick="return confirm('Are you sure you want to end digital access for @item.Book.Title?');">
+                                    End Access
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>

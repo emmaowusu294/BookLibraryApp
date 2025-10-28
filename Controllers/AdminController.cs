@@ -31,8 +31,13 @@ public class AdminController : Controller
         // --- 1. Core Counts ---
         model.TotalBooks = await _context.Books.CountAsync();
 
+        //--active loans
         var activeLoans = await _context.Loans.CountAsync(l => l.IsActive);
         model.TotalActiveLoans = activeLoans;
+
+        //---------ended loans---------
+        var allLoans = await _context.Loans.CountAsync();
+        model.TotalEndedLoans = allLoans - activeLoans;
 
         // --- Assumption: Count all users for now ---
         model.TotalPatrons = await _userManager.Users.CountAsync();

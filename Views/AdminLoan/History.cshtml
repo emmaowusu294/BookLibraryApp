@@ -3,45 +3,46 @@
 @{
     ViewData["Title"] = "Admin: Full Loan History";
 }
+<div class="container-md" style="padding: 50px;">
+    <h2>Full Loan History (Active & Ended)</h2>
+    <hr />
 
-<h2>Full Loan History (Active & Ended)</h2>
-<hr />
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Loan ID</th>
-            <th>Book Title</th>
-            <th>User ID</th>
-            <th>Loan Date</th>
-            <th>Due Date</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <table class="table">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.Id)</td>
-                <td>@Html.DisplayFor(modelItem => item.Book.Title)</td>
-                <td>@Html.DisplayFor(modelItem => item.UserId)</td>
-                <td>@Html.DisplayFor(modelItem => item.LoanDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
-                <td>
-                    @if (item.IsActive)
-                    {
-                        <span class="badge bg-success">Active</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Ended</span>
-                    }
-                </td>
+                <th>Loan ID</th>
+                <th>Book Title</th>
+                <th>User ID</th>
+                <th>Loan Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Book.Title)</td>
+                    <td>@Html.DisplayFor(modelItem => item.UserId)</td>
+                    <td>@Html.DisplayFor(modelItem => item.LoanDate)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Ended</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-<p>
-    <a asp-action="Index">View Only Active Loans</a>
-</p>
+    <p>
+        <a asp-action="Index">View Only Active Loans</a>
+    </p>
+</div>

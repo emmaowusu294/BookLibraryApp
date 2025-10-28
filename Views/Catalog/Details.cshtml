@@ -3,54 +3,55 @@
 @{
     ViewData["Title"] = "Book Details";
 }
+<div class="container-md" style="padding: 50px;">
+    <h1>Details</h1>
 
-<h1>Details</h1>
-
-<div>
-    <h4>Book: @Html.DisplayFor(model => model.Title)</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.AuthorName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.AuthorName)
-        </dd>
-    </dl>
-</div>
+    <div>
+        <h4>Book: @Html.DisplayFor(model => model.Title)</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Title)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Title)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.AuthorName)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.AuthorName)
+            </dd>
+        </dl>
+    </div>
 
 
-<div class="mt-3">
-    @if (User.Identity.IsAuthenticated)
-    {
-        // 🔑 NEW LOGIC: Check the HasActiveLoan flag
-        if (Model.HasActiveLoan)
+    <div class="mt-3">
+        @if (User.Identity.IsAuthenticated)
         {
-            <a asp-controller="Catalog" asp-action="Read" asp-route-id="@Model.BookId" class="btn btn-lg btn-primary">
-                <i class="bi bi-book"></i> Continue Reading
-            </a>
-            <span class="text-success ms-3">You have active digital access.</span>
+            // 🔑 NEW LOGIC: Check the HasActiveLoan flag
+            if (Model.HasActiveLoan)
+            {
+                <a asp-controller="Catalog" asp-action="Read" asp-route-id="@Model.BookId" class="btn btn-lg btn-primary">
+                    <i class="bi bi-book"></i> Continue Reading
+                </a>
+                <span class="text-success ms-3">You have active digital access.</span>
+            }
+            else
+            {
+                @* Show the Borrow button if logged in but NO active loan *@
+                <form asp-controller="Loan" asp-action="Checkout" asp-route-id="@Model.BookId" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-lg btn-success">
+                        Borrow Digital Copy
+                    </button>
+                </form>
+            }
         }
         else
         {
-            @* Show the Borrow button if logged in but NO active loan *@
-            <form asp-controller="Loan" asp-action="Checkout" asp-route-id="@Model.BookId" method="post" class="d-inline">
-                <button type="submit" class="btn btn-lg btn-success">
-                    Borrow Digital Copy
-                </button>
-            </form>
+            <p class="text-info">Please <a asp-area="Identity" asp-page="/Account/Login">log in</a> to borrow this book.</p>
         }
-    }
-    else
-    {
-        <p class="text-info">Please <a asp-area="Identity" asp-page="/Account/Login">log in</a> to borrow this book.</p>
-    }
 
-    <a asp-action="Index" class="btn btn-secondary">Back to Catalog</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to Catalog</a>
+    </div>
 </div>

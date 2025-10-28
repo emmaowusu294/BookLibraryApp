@@ -3,42 +3,44 @@
     ViewData["Title"] = "Manage System Users";
 }
 
-<h2>Manage System Users</h2>
-<hr />
+<div class="container-md" style="padding: 50px;">
+    <h2>Manage System Users</h2>
+    <hr />
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Email (Username)</th>
-            <th>Current Roles</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var userModel in Model)
-        {
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@userModel.User.Email</td>
-                <td>
-                    @foreach (var role in userModel.Roles)
-                    {
-                        <span class="badge @(role == "Admin" ? "bg-danger" : "bg-info")">@role</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@userModel.User.Id" class="btn btn-sm btn-info">Manage</a>
-
-                    @if (!userModel.Roles.Contains("Admin"))
-                    {
-                        <form asp-action="DeleteUser" asp-route-id="@userModel.User.Id" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-outline-danger"
-                                    onclick="return confirm('Are you sure you want to permanently delete user @userModel.User.Email?');">
-                                Delete
-                            </button>
-                        </form>
-                    }
-                </td>
+                <th>Email (Username)</th>
+                <th>Current Roles</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var userModel in Model)
+            {
+                <tr>
+                    <td>@userModel.User.Email</td>
+                    <td>
+                        @foreach (var role in userModel.Roles)
+                        {
+                            <span class="badge @(role == "Admin" ? "bg-danger" : "bg-info")">@role</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@userModel.User.Id" class="btn btn-sm btn-info">Manage</a>
+
+                        @if (!userModel.Roles.Contains("Admin"))
+                        {
+                            <form asp-action="DeleteUser" asp-route-id="@userModel.User.Id" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Are you sure you want to permanently delete user @userModel.User.Email?');">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
