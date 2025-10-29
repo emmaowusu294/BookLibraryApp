@@ -24,7 +24,7 @@ namespace BookLibraryApp.Models.ViewModels
         [Display(Name = "Summary/Description")]
         public string? Description { get; set; }
 
-        [Range(1800, 2099)] // Basic year validation
+        [Range(1400, 2099)] // Basic year validation
         [Display(Name = "Publication Year")]
         public int? PublicationYear { get; set; }
 

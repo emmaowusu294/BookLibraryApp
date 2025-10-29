@@ -3,55 +3,82 @@
 @{
     ViewData["Title"] = "Book Details";
 }
-<div class="container-md" style="padding: 50px;">
-    <h1>Details</h1>
 
-    <div>
-        <h4>Book: @Html.DisplayFor(model => model.Title)</h4>
-        <hr />
-        <dl class="row">
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Title)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Title)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.AuthorName)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.AuthorName)
-            </dd>
-        </dl>
-    </div>
+@* 🔑 FIX: Add padding-top to the main container for spacing below the navbar *@
+<div class="container" style="padding-top: 50px;">
 
+    <div class="row">
 
-    <div class="mt-3">
-        @if (User.Identity.IsAuthenticated)
-        {
-            // 🔑 NEW LOGIC: Check the HasActiveLoan flag
-            if (Model.HasActiveLoan)
+        @* Column 1: Cover Image and Borrow Button *@
+        <div class="col-md-4 text-center">
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
             {
-                <a asp-controller="Catalog" asp-action="Read" asp-route-id="@Model.BookId" class="btn btn-lg btn-primary">
-                    <i class="bi bi-book"></i> Continue Reading
-                </a>
-                <span class="text-success ms-3">You have active digital access.</span>
+                <img src="@Model.CoverImageUrl" alt="Cover for @Model.Title" class="img-fluid shadow-lg rounded-3 mb-4" style="max-height: 400px; width: 100%; object-fit: cover;" />
             }
             else
             {
-                @* Show the Borrow button if logged in but NO active loan *@
-                <form asp-controller="Loan" asp-action="Checkout" asp-route-id="@Model.BookId" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-lg btn-success">
-                        Borrow Digital Copy
-                    </button>
-                </form>
+                <div class="bg-light border rounded-3 d-flex justify-content-center align-items-center mb-4" style="height: 400px;">
+                    <i class="fas fa-book-open fa-5x text-muted"></i>
+                </div>
             }
-        }
-        else
-        {
-            <p class="text-info">Please <a asp-area="Identity" asp-page="/Account/Login">log in</a> to borrow this book.</p>
-        }
 
-        <a asp-action="Index" class="btn btn-secondary">Back to Catalog</a>
+            @* Borrow/Read Button Logic (Retained from previous fix) *@
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (Model.HasActiveLoan)
+                {
+                    <a asp-controller="Catalog" asp-action="Read" asp-route-id="@Model.BookId" class="btn btn-lg btn-primary w-100 mb-3">
+                        <i class="fas fa-book-reader"></i> Continue Reading
+                    </a>
+                }
+                else
+                {
+                    <form asp-controller="Loan" asp-action="Checkout" asp-route-id="@Model.BookId" method="post">
+                        <button type="submit" class="btn btn-lg btn-success w-100 mb-3">
+                            <i class="fas fa-hand-holding-box"></i> Borrow Digital Copy
+                        </button>
+                    </form>
+                }
+            }
+            else
+            {
+                <p class="text-info">Please <a asp-area="Identity" asp-page="/Account/Login">log in</a> to borrow this book.</p>
+            }
+
+            <a asp-action="Index" class="btn btn-secondary w-100">Back to Catalog</a>
+        </div>
+
+        @* Column 2: Metadata and Description *@
+        <div class="col-md-8">
+            <h1 class="display-5 text-primary">@Html.DisplayFor(model => model.Title)</h1>
+            <h4 class="text-muted mb-4">by @Html.DisplayFor(model => model.AuthorName)</h4>
+
+            <hr />
+
+            <h3>Summary</h3>
+            @* 🔑 FIX: Use Paragraph Tag for Description *@
+            <p>@Html.DisplayFor(model => model.Description)</p>
+
+            <h4 class="mt-5">Book Details</h4>
+            <dl class="row">
+                <dt class="col-sm-4">Genre:</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Genre)</dd>
+
+                <dt class="col-sm-4">Publication Year:</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.PublicationYear)</dd>
+
+                <dt class="col-sm-4">Access Status:</dt>
+                <dd class="col-sm-8">
+                    @if (Model.HasActiveLoan)
+                    {
+                        <span class="badge bg-success">Access Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Available to Borrow</span>
+                    }
+                </dd>
+            </dl>
+        </div>
     </div>
 </div>

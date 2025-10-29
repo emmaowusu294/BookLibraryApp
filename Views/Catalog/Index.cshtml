@@ -37,12 +37,22 @@
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0">
                         <div class="card-body d-flex flex-column">
+
+                            @* 🔑 NEW: Display Cover Image at the top of the card *@
+                            @if (!string.IsNullOrEmpty(item.CoverImageUrl))
+                            {
+                                <div class="text-center mb-3">
+                                    <img src="@item.CoverImageUrl" alt="Cover" style="max-height: 150px; width: auto; border-radius: 5px;" class="img-fluid" />
+                                </div>
+                            }
+
                             <h5 class="card-title text-primary">@Html.DisplayFor(modelItem => item.Title)</h5>
                             <h6 class="card-subtitle mb-2 text-muted">@Html.DisplayFor(modelItem => item.AuthorName)</h6>
 
+                            @* Display key metadata on the card *@
                             <p class="card-text small mt-2">
-                                @* Example: Short description or status *@
-                                Available: <span class="fw-bold">Yes</span>
+                                Genre: <strong>@item.Genre</strong><br />
+                                Year:  <strong>@item.PublicationYear</strong>
                             </p>
 
                             <div class="mt-auto pt-3">

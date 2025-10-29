@@ -34,8 +34,8 @@ namespace BookLibraryApp.Services
         }
 
 
-        // 🟢 Get all books with author names (Now with Search Filter)
-        public async Task<IEnumerable<BookViewModel>> GetAllBooksAsync(string? searchString)
+        /// 🟢 Get all books with author names(Now with Search Filter)
+public async Task<IEnumerable<BookViewModel>> GetAllBooksAsync(string? searchString)
         {
             var query = _context.Books.Include(b => b.Author).AsQueryable();
 
@@ -47,21 +47,24 @@ namespace BookLibraryApp.Services
                     (b.Author != null && b.Author.Name.ToLower().Contains(lowerSearch)));
             }
 
-            // Apply sorting before projection for better DB performance potential
+            // Apply sorting before projection
             query = query.OrderBy(b => b.Title);
 
-            // 🔑 UPDATED SELECT: Now maps all new fields
+            // 🔑 FIX: UPDATED SELECT projection to include all new fields
             return await query
-                .Select(b => new BookViewModel // Direct projection can be efficient too
+                .Select(b => new BookViewModel
                 {
                     BookId = b.BookId,
                     Title = b.Title,
                     AuthorId = b.AuthorId,
                     AuthorName = b.Author != null ? b.Author.Name : "Unknown",
+
+                    // 🔑 CRITICAL ADDITIONS: Map the new metadata fields
                     Description = b.Description,
                     PublicationYear = b.PublicationYear,
                     Genre = b.Genre,
                     CoverImageUrl = b.CoverImageUrl
+
                 })
                 .ToListAsync();
         }

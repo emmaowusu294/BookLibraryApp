@@ -2,43 +2,34 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-// 🔑 NEW USING STATEMENTS
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity; // Needed for UserManager
-using Microsoft.EntityFrameworkCore; // Needed for .AnyAsync() and DbContext access
-using BookLibraryApp.Models.Entities; // Assuming Loan entity is here
-
-
-using BookLibraryApp.Models.ViewModels; // IMPORTANT: For the new ViewModel
-
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using BookLibraryApp.Models.Entities;
+using BookLibraryApp.Models.ViewModels; // Contains BookViewModel and BookDetailsViewModel
 
 namespace BookLibraryApp.Controllers
 {
-    // NO AUTHORIZE attribute here, allowing public access to Index and Details
     public class CatalogController : Controller
     {
         private readonly IBookService _bookService;
-
-        // 🔑 REQUIRED: Define private fields for the new dependencies
         private readonly LibraryDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
-        // 🔑 REQUIRED: Update the constructor to accept all dependencies
         public CatalogController(
             IBookService bookService,
             LibraryDbContext context,
             UserManager<IdentityUser> userManager)
         {
             _bookService = bookService;
-            _context = context;         // Initialize DbContext
-            _userManager = userManager; // Initialize UserManager
+            _context = context;
+            _userManager = userManager;
         }
 
         // GET: /Catalog or /Catalog/Index (Public Book List with Search)
         public async Task<IActionResult> Index(string searchString)
         {
             var books = await _bookService.GetAllBooksAsync(searchString);
-
             ViewData["CurrentFilter"] = searchString;
             return View(books);
         }
@@ -46,21 +37,27 @@ namespace BookLibraryApp.Controllers
         // GET: /Catalog/Details/5 (Public view for book details)
         public async Task<IActionResult> Details(int id)
         {
-            // Use the service to get the base data
             var bookViewModel = await _bookService.GetBookByIdAsync(id);
             if (bookViewModel == null)
             {
                 return NotFound();
             }
 
-            // 1. Map the base ViewModel to the enhanced Details ViewModel
+            // 1. 🔑 FIX: Map ALL properties from BookViewModel to BookDetailsViewModel
             var model = new BookDetailsViewModel
             {
                 BookId = bookViewModel.BookId,
                 Title = bookViewModel.Title,
                 AuthorName = bookViewModel.AuthorName,
-                AuthorId = bookViewModel.AuthorId, // Include existing properties
-                HasActiveLoan = false // Default to false
+                AuthorId = bookViewModel.AuthorId,
+
+                // 🚨 CRITICAL FIX: Ensure new metadata is mapped 🚨
+                Description = bookViewModel.Description,
+                PublicationYear = bookViewModel.PublicationYear,
+                Genre = bookViewModel.Genre,
+                CoverImageUrl = bookViewModel.CoverImageUrl,
+
+                HasActiveLoan = false // Default
             };
 
             // 2. Check loan status only if the user is authenticated
@@ -68,7 +65,6 @@ namespace BookLibraryApp.Controllers
             {
                 var userId = _userManager.GetUserId(User);
 
-                // Perform the async loan check against the database
                 model.HasActiveLoan = await _context.Loans
                     .AnyAsync(l => l.BookId == id && l.UserId == userId && l.IsActive);
             }
@@ -82,10 +78,14 @@ namespace BookLibraryApp.Controllers
         [Authorize] // Only available to any logged-in user
         public async Task<IActionResult> Read(int id) // id is BookId
         {
-            // 🔑 These lines now work because _userManager and _context are initialized
             var userId = _userManager.GetUserId(User);
 
-            // Security Check: Does the user have an active loan for this book?
+            // Fetch the book entity to get all metadata for display
+            var book = await _context.Books
+                .Include(b => b.Author) // Include author if needed for display
+                .FirstOrDefaultAsync(b => b.BookId == id);
+
+            // Security Check
             bool hasAccess = await _context.Loans
                 .AnyAsync(l => l.BookId == id && l.UserId == userId && l.IsActive);
 
@@ -95,16 +95,15 @@ namespace BookLibraryApp.Controllers
                 return RedirectToAction("Details", new { id = id });
             }
 
-            // 🔑 NEW: Fetch the book and pass the title to the view
-            var book = await _context.Books.FindAsync(id);
+            // Pass the required display data to ViewData
             if (book != null)
             {
                 ViewData["Title"] = $"Reading: {book.Title}";
                 ViewData["BookTitle"] = book.Title;
+                ViewData["AuthorName"] = book.Author?.Name;
+                ViewData["CoverImageUrl"] = book.CoverImageUrl;
                 ViewData["BookId"] = book.BookId;
             }
-            // Logic to render the digital content (e.g., PDF link, chapter text)
-            // ...
 
             return View();
         }

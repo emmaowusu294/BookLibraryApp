@@ -7,114 +7,97 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BookLibraryApp</title>
+    <title>@ViewData["Title"] - LibriVerse</title> @* Updated Title *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookLibraryApp.styles.css" asp-append-version="true" />
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    @* Add your logo as a favicon (optional but good practice) *@
+    <link rel="icon" href="~/images/libriverse-logo.png" type="image/png">
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                @* The ASP.NET Core Tag Helper logic below checks if the user is authenticated: *@
+                @* LOGO/BRAND (Handles redirection based on login status) *@
                 @if (User.Identity.IsAuthenticated)
                 {
-                    @* LOGGED-IN: Directs to our new controller, which handles role-based redirection *@
-                    <a class="navbar-brand" asp-area="" asp-controller="UserRedirect" asp-action="Index">
-                        Online Library
+                    <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="UserRedirect" asp-action="Index">
+                        @* Added flex classes *@
+                        @* 🖼️ FIX: Replace text with image tag *@
+                        <img src="~/images/libriverse-logo.png" alt="LibriVerse Logo" style="height: 70px;" />
+                        LibriVerse @* Keep text next to logo *@
                     </a>
                 }
                 else
                 {
-                    @* LOGGED-OUT: Directs to the public marketing landing page *@
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                        Online Library
+                    <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                        @* Added flex classes *@
+                        @* 🖼️ FIX: Replace text with image tag *@
+                        <img src="~/images/libriverse-logo.png" alt="LibriVerse Logo" style="height: 70px;" />
+                        LibriVerse @* Keep text next to logo *@
                     </a>
                 }
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-
-                       
-
-                        @* Admin/Staff Links: You might want to wrap these in an authorization check later (e.g., if (User.IsInRole("Admin"))), but for now, we'll keep them visible *@
-                        @if (SignInManager.IsSignedIn(User))
-                            if (User.IsInRole("Admin"))
-                            {
-                                {
-                                    <li class="nav-item ">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Index">Books</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="AdminLoan" asp-action="Index">Active Loans</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="AdminLoan" asp-action="History">Full Loan History</a>
-                                    </li>
-
-                                }
-
-
-                            }
-                            else
-                            {
-                                @* Public Links: Catalog is visible to everyone *@
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Index">Catalog</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Loan" asp-action="MyLoans">My Loans</a>
-                                </li>
-                            }
-
-                    </ul>
-
-                    @* Authentication/Login Links (Right side of the navbar) *@
-                    <ul class="navbar-nav">
-                        @if (SignInManager.IsSignedIn(User))
+                        @* Public/Patron Links *@
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Index">Catalog</a>
+                        </li>
+                        @* Admin Links (Conditional Rendering) *@
+                        @if (User.Identity.IsAuthenticated && await UserManager.IsInRoleAsync(await UserManager.GetUserAsync(User), "Admin"))
                         {
                             <li class="nav-item">
-                                <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Dashboard">
+                                    <i class="fas fa-cogs me-1"></i> Admin Dashboard
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                                    <button id="logout" type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-                                </form>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Index">Books</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminUser" asp-action="Index">Users</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminLoan" asp-action="Index">Active Loans</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminLoan" asp-action="History">Loan History</a>
                             </li>
                         }
-                        else
+                        @* Patron Only Links *@
+                        @if (SignInManager.IsSignedIn(User) && !(await UserManager.IsInRoleAsync(await UserManager.GetUserAsync(User), "Admin")))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Loan" asp-action="MyLoans">My Loans</a>
                             </li>
                         }
                     </ul>
+                    @* Authentication/Login Links *@
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
     <div class="">
+        @* Consider adding container class here if needed for body padding *@
         <main role="main" class="">
+            @* Added padding-bottom *@
             @RenderBody()
         </main>
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            <span class="text-white">
-            &copy; 2025 - BookLibraryApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-            </span>
+        <div class="container text-white">
+            @* Updated Footer *@
+            &copy; @DateTime.Now.Year - LibriVerse - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
