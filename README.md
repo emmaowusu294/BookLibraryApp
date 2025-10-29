@@ -1,4 +1,4 @@
-﻿# LibriVerse - Online Digital Library 📚💻
+﻿# LibriVerse - Online Digital Library 📚💻 -- Emmanuel Owusu
 
 **Landing Page:**
 ![LibriVerse Landing Page](docs/images/landing-page.png "LibriVerse Home")
@@ -71,3 +71,13 @@ This project was developed primarily as a learning exercise for ASP.NET Core con
 * **Language:** C#
 
 ---
+
+## 👨‍💻 Developer
+
+**Name:** Emmanuel Owusu  
+**Email:** [eo8407272@gmail.com](mailto:eo8407272@gmail.com)  
+**Phone:** +233 53 674 6852  
+**LinkedIn:** [https://www.linkedin.com/in/emmanuelowusu123](https://www.linkedin.com/in/emmanuelowusu123)
+
+---
+
