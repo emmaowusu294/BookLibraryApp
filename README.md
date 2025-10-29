@@ -1,8 +1,8 @@
 ﻿# LibriVerse - Online Digital Library 📚💻
 
 **Landing Page:**
-![LibriVerse Landing Page](docs/images/landing2.png "LibriVerse Home")
 ![LibriVerse Landing Page](docs/images/landing-page.png "LibriVerse Home")
+![LibriVerse Landing Page](docs/images/landing2.png "LibriVerse Home")
 
 ---
 ## Description
