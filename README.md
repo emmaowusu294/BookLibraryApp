@@ -11,7 +11,7 @@
 ---
 ## Description
 
-LibriVerse is a web application built with ASP.NET Core MVC that functions as an online digital library. It allows a single administrator to manage a curated collection of digital books and grant timed access (digital loans) to registered users (Patrons). Patrons can browse the catalog, borrow books, and access their loaned content directly through the site.
+LibriVerse is a web application built with ASP.NET Core MVC that functions as an online digital library. It allows a single administrator to manage a curated collection of digital books and grant timed access (digital loans) to registered users ( as Patrons). Patrons can browse the catalog, borrow books, and access their loaned content directly through the site.
 
 This project was developed primarily as a learning exercise for ASP.NET Core concepts.
 
