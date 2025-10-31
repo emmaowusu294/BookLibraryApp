@@ -39,7 +39,7 @@ This project was developed primarily as a learning exercise for ASP.NET Core con
 * **Patron/User Features:**
     * Secure user registration and login using ASP.NET Core Identity.
     * Public-facing Catalog for browsing books (with search functionality).
-    * Detailed view for each book including cover, description, and metadata.
+    * Detailed view for each  book including cover, description, and metadata.
     * Self-service digital checkout (borrowing) of books with a fixed loan duration (e.g., 14 days).
     * "My Loans" page showing currently active digital loans.
     * Simulated "Read" page to access borrowed digital content (access controlled by loan status).
